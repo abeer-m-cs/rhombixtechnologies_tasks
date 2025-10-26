@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="amazon_sales.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2774"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="Amazon Sale Report" custom_title="0" dock_id="1" table="4,18:mainAmazon Sale Report"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011800ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">--SELECT 
+--PRINT ROWS FROM 0 TO 10
+SELECT *
+FROM &quot;Amazon Sale Report&quot;
+LIMIT 10;
+
+--WHERE
+--DISPLAY FIRST 10 ROWS OF ORDER THAT WERE SHIPPED 
+SELECT &quot;Order ID&quot;, &quot;Status&quot;, &quot;Amount&quot;
+FROM &quot;Amazon Sale Report&quot;
+WHERE &quot;Status&quot; LIKE '%Shipped%'
+LIMIT 10;
+
+--REVENUE
+/*“Show me the total revenue (sum of all Amounts) from the Amazon Sale Report table,
+but only include the orders whose Status contains the word ‘Shipped’,
+and round the final number to 2 decimal places.”*/
+SELECT 
+ROUND(SUM(&quot;Amount&quot;), 2) AS total_revenue
+FROM &quot;Amazon Sale Report&quot;
+WHERE &quot;Status&quot; LIKE '%Shipped%';
+
+--Top 10 best-selling products OR Finding products with the highest total sales
+--Group the same SKU + Category, sum their Amounts, and show them from highest to lowest
+--SKU stands for Stock Keeping Unit(It’s like an ID number for a product)
+SELECT 
+  &quot;SKU&quot; AS ProductID,
+  &quot;Category&quot;,
+  ROUND(SUM(&quot;Amount&quot;), 2) AS total_sales
+FROM &quot;Amazon Sale Report&quot;
+WHERE &quot;Status&quot; LIKE '%Shipped%'
+GROUP BY &quot;SKU&quot;, &quot;Category&quot;
+ORDER BY total_sales DESC
+LIMIT 10;
+
+--Show how many total orders were fulfilled by each type (Amazon or Merchant)
+SELECT 
+  &quot;Fulfilment&quot;,
+  COUNT(*) AS total_orders
+FROM &quot;Amazon Sale Report&quot;
+GROUP BY &quot;Fulfilment&quot;
+ORDER BY total_orders DESC;
+
+--average amount spent per shipped order
+SELECT 
+  ROUND(AVG(&quot;Amount&quot;), 2) AS average_order_value
+FROM &quot;Amazon Sale Report&quot;
+WHERE &quot;Status&quot; LIKE '%Shipped%';
+
+--states that have the most shipped orders
+SELECT 
+  &quot;ship-state&quot; AS State,
+  COUNT(*) AS total_orders
+FROM &quot;Amazon Sale Report&quot;
+WHERE &quot;Status&quot; LIKE '%Shipped%'
+GROUP BY &quot;ship-state&quot;
+ORDER BY total_orders DESC
+LIMIT 10;
+
+--which months had the highest total revenue
+/*SUBSTR means substring — it’s a function that takes part of a text value (a piece of a string)
+SUBSTR(text, start_position, number_of_characters)
+*/
+SELECT 
+  SUBSTR(&quot;Date&quot;, 1, 2) AS Month,
+  ROUND(SUM(&quot;Amount&quot;), 2) AS total_revenue
+FROM &quot;Amazon Sale Report&quot;
+WHERE &quot;Status&quot; LIKE '%Shipped%'
+GROUP BY Month
+ORDER BY Month;
+
+--Revenue by sales channel
+/*Show me each sales channel (like Amazon.in, Amazon.com),
+add up the total sales amount for each,
+clean up extra spaces,and list them */
+--The TRIM() function removes extra spaces from the beginning or end of text.
+SELECT 
+  TRIM(&quot;Sales Channel &quot;) AS Sales_Channel,
+  ROUND(SUM(&quot;Amount&quot;), 2) AS total_revenue
+FROM &quot;Amazon Sale Report&quot;
+GROUP BY Sales_Channel
+ORDER BY total_revenue ;
+
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
